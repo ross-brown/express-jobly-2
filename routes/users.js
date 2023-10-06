@@ -29,9 +29,9 @@ const router = express.Router();
 
 router.post("/", ensureAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
-      req.body,
-      userNewSchema,
-      { required: true },
+    req.body,
+    userNewSchema,
+    { required: true },
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -83,9 +83,9 @@ router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, nex
 
 router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
-      req.body,
-      userUpdateSchema,
-      { required: true },
+    req.body,
+    userUpdateSchema,
+    { required: true },
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -119,6 +119,18 @@ router.post("/:username/jobs/:id", ensureCorrectUserOrAdmin, async function (req
   const jobId = +req.params.id;
   await User.applyToJob(req.params.username, jobId);
   return res.json({ applied: jobId });
+});
+
+/** DELETE /[username]/jobs/[id]
+ *
+ * Returns {"unapplied": jobId}
+ *
+ * Authorization required: admin or same-user-as: username
+ */
+router.delete("/:username/jobs/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  const jobId = +req.params.id;
+  await User.unapplyToJob(req.params.username, jobId);
+  return res.json({ unapplied: jobId });
 });
 
 
